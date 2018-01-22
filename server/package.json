@@ -1,17 +1,18 @@
 {
-  "name": "Binance Monitor Server",
+  "name": "Binancial-server",
   "version": "1.0.0",
-  "description": "Binance Monitor Server",
+  "description": "Binancial Aid Server",
   "main": "server.js",
   "scripts": {
-	  "start": "node_modules/forever/bin/forever start server.js",
-	  "stop": "node_modules/forever/bin/forever stop server.js"
+    "start": "node_modules/forever/bin/forever start server.js",
+    "stop": "node_modules/forever/bin/forever stop server.js"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.2",
+    "forever": "^0.15.3",
     "lodash": "^4.17.4",
     "minimist": "^1.2.0",
     "nocache": "^2.0.0",

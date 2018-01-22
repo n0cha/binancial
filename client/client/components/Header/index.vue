@@ -1,5 +1,5 @@
 <template>
-	<header>
+	<el-header>
 		<el-menu theme="dark" mode="horizontal">
 			<el-menu-item class="header-navicon" index="1">
 				<el-button type="text" @click="openSidebar">
@@ -16,7 +16,7 @@
 			</el-submenu>
 -->
 		</el-menu>
-	</header>
+	</el-header>
 </template>
 
 <script>

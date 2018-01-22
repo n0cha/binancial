@@ -1,6 +1,6 @@
 <template>
-	<div id="sidebar" :class="{'open': active}">
-		<el-menu theme="light" router>
+	<el-aside width="300px" height="100%">
+		<el-menu theme="dark" router>
 			<div class="logo-container">
 				<img class="logo" src="../../../static/binance-logo.png"/>
 			</div>
@@ -26,7 +26,7 @@
 			<el-menu-item index="/about">About</el-menu-item>
 -->
 		</el-menu>
-	</div>
+	</el-aside>
 </template>
 
 <script>
@@ -42,8 +42,20 @@
 	}
 </script>
 
-<style lang="scss">
+<style>
+	.el-header {
+		background-color: #B3C0D1;
+		color: #333;
+		line-height: 60px;
+	}
+
+	.el-aside {
+		color: #333;
+	}
+	
+/*
 	// You can import all your SCSS variables using webpack alias
 	@import '~scss_vars';
 	@import './style.scss';
+*/
 </style>
