@@ -52,15 +52,6 @@
 </script>
 
 <style lang="scss">
-	/*.el-container {*/
-		/*display: flex;*/
-		/*flex-direction: row;*/
-		/*flex: 1;*/
-		/*box-sizing: border-box;*/
-		/*min-width: 0;*/
-	/*}*/
-	
-	// You can import all your SCSS variables using webpack alias
 	@import '~scss_vars';
 	@import './style.scss';
 </style>

@@ -1,0 +1,8 @@
+#assetList {
+	[data-positive=true] {
+		color: $positive;
+	}
+	[data-positive=false] {
+		color: $negative;
+	}
+}

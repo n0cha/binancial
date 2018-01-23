@@ -11,9 +11,9 @@ const getInterval = () => {
 }
 
 const getQuery = () => ({
-  d: window.localStorage.getItem('denominators'),
-  c: window.localStorage.getItem('coins'),
-  v: window.localStorage.getItem('conversions')
+  d: window.localStorage.getItem('denominators') || '[]',
+  c: window.localStorage.getItem('coins') || '[]',
+  v: window.localStorage.getItem('conversions') || '[]'
 })
 
 const getData = () => new Promise((resolve, reject) => {

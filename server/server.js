@@ -20,8 +20,8 @@ app.use('/', root);
 root.use('/', require('./lib/router.js'));
 
 const options = {
-	key: fs.readFileSync('server/ssl/key.pem'),
-	cert: fs.readFileSync('server/ssl/cert.pem'),
+	key: fs.readFileSync('ssl/key.pem'),
+	cert: fs.readFileSync('ssl/cert.pem'),
 	requestCert: false,
 	rejectUnauthorized: false
 };
