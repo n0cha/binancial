@@ -1,11 +1,15 @@
 <template>
 	<div id="app">
-		<el-container direction="horizontal">
+		<el-container class="page-layout" direction="horizontal">
 			<sidebar-component :active="sidebarOpened"/>
-			<el-container direction="vertical">
+			<el-container class="page-layout-inner" direction="vertical">
 				<header-component :openSidebar="openSidebar" :title="title"/>
 				<el-main>
-					<router-view></router-view>
+					<div class="main-content">
+						<el-row class="container">
+							<router-view></router-view>
+						</el-row>
+					</div>
 				</el-main>
 			</el-container>
 			<dimmer :active="obfuscatorActive" :closeSidebar="closeSidebar"/>
@@ -48,6 +52,15 @@
 </script>
 
 <style lang="scss">
+	/*.el-container {*/
+		/*display: flex;*/
+		/*flex-direction: row;*/
+		/*flex: 1;*/
+		/*box-sizing: border-box;*/
+		/*min-width: 0;*/
+	/*}*/
+	
 	// You can import all your SCSS variables using webpack alias
 	@import '~scss_vars';
-	@import './style.scss';</style>
+	@import './style.scss';
+</style>

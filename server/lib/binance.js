@@ -6,7 +6,7 @@ const recvWindow = 30000;
 			getData: ({coins, apiKey, secretKey, denominators, conversions}) => {
 				const signRequest = qs => {
 					const timestamp = Date.now();
-					qs = _.extend(qs, {recvWindow, timestamp});
+					qs = _.assign(qs, {recvWindow, timestamp});
 					const queryString = _.map(qs, (value, key) => `${key}=${value}`).join('&');
 					qs.signature = CryptoJS.HmacSHA256(queryString, secretKey).toString(CryptoJS.enc.Hex);
 					return qs;
@@ -25,6 +25,7 @@ const recvWindow = 30000;
 					
 					request({uri, qs, headers}, (error, response, body) => {
 						if (error) {
+							console.log(error);
 							return reject(error);
 						}
 						resolve(JSON.parse(body));
@@ -32,13 +33,21 @@ const recvWindow = 30000;
 				});
 				
 				const setConversionRates = priceData => {
-					_.each(conversions, conversionFrom => {
-						_.each(conversionFrom, conversionTo => {
-							conversionTo.price = _.find(priceData, {symbol: conversionTo.symbol}).price;
-							if (conversionTo.inverted) {
-								conversionTo.price = 1 / conversionTo.price;
-							}
+					_.each(conversions, conversion => {
+						let symbol = `${conversion.from}${conversion.to}`;
+						let symbolData = _.find(priceData, {symbol});
+						if (!symbolData) {
+							symbol = `${conversion.to}${conversion.from}`;
+							symbolData = _.find(priceData, {symbol});
+							conversion.inverted = true;
+						}
+						_.assign(conversion, {
+							symbol,
+							price: symbolData.price
 						});
+						if (conversion.inverted) {
+							conversion.price = 1 / conversion.price;
+						}
 					});
 				};
 				
@@ -103,13 +112,9 @@ const recvWindow = 30000;
 								denominator,
 								price,
 								buyAvg: tradeData.avg,
-								converted: _.reduce(conversions[denominator], (result, conversion, coin) => {
-									result[coin] = {
-										symbol: conversion.symbol,
-										buyAvg: _.round(tradeData.avg * conversion.price, 8)
-									};
-									return result;
-								}, {})
+								converted: _(conversions).filter({from: denominator}).map((conversion) => _.assign(conversion, {
+									buyAvg: _.round(tradeData.avg * conversion.price, 8)
+								})).value()
 							};
 						});
 				
@@ -144,7 +149,11 @@ const recvWindow = 30000;
 						.then(([denominators, coins]) => ({
 							denominators,
 							coins
-						}));
+						}))
+						.catch(err => {
+							console.error(err);
+							throw err;
+						})
 			}
 		};
 	};

@@ -1,6 +1,6 @@
 <template>
 	<el-header>
-		<el-menu theme="dark" mode="horizontal">
+		<el-menu mode="horizontal">
 			<el-menu-item class="header-navicon" index="1">
 				<el-button type="text" @click="openSidebar">
 					<i class="md-icon">menu</i>
@@ -27,7 +27,6 @@
 </script>
 
 <style lang="scss">
-	// You can import all your SCSS variables using webpack alias
 	@import '~scss_vars';
 	@import './style.scss';
 </style>

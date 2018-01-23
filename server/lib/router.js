@@ -37,7 +37,10 @@ router.get('/data', (req, res) => {
 			.then(data => {
 				res.json(data);
 				res.end();
-			});
+			})
+			.catch(err => {
+				res.end(err.toString());
+			})
 });
 
 module.exports = router;

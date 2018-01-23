@@ -5,7 +5,8 @@ import App from 'components/App' // require components using webpack alias
 import { router } from './router' // Vue Router
 import store from './store' // Vuex store
 import locale from 'element-ui/lib/locale/lang/en'
-import 'theme/index.css' // generated Element-UI theme
+// import 'theme/index.css' // generated Element-UI theme
+import 'element-theme-chalk'
 import 'normalize.css' // normalize
 import 'whatwg-fetch' // polyfill
 import 'material-design-icons' // material icons, because Element-UI icons set is incomplete

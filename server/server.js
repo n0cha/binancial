@@ -4,6 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const noCache = require('nocache');
+const cors = require('cors')
 const https = require('https');
 const fs = require('fs');
 
@@ -12,6 +13,7 @@ const root = express.Router();
 
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(cors());
 app.use(noCache());
 app.use('/', root);
 

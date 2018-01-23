@@ -1,4 +1,5 @@
 #sidebar {
+    background-color: $dark;
     z-index: 5;
     width: $sidebar-size;
     border-right: 1px solid $grey;
@@ -27,6 +28,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+        background: none;
     }
 
     .logo-container {
