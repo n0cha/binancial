@@ -20,13 +20,10 @@ router.use((req, res, next) => {
 	next();
 });
 
-// config.apiKey = '8shF97AOQnlkBXC3ZsNPhDbQTmRC4Qj9fBc4GvuH2VNqYBkWGdoTJfGskoxGl89N';
-// config.secretKey = 'dcW9AIIXjR7ODYdMBVVOBSB5CLG1GoMUJIVhqNnCt71uom6WvDbS1IjR3ILbbejo';
-
 router.get('/data', (req, res) => {
 	if (req.query.e) {
 		delete req.query.e;
-		_.mapValues(req.query, value => Buffer.from(value, 'base64'));
+		req.query = _.mapValues(req.query, value => Buffer.from(value, 'base64'));
 	}
 	_.assign(config, {
 		coins: JSON.parse(req.query.c),

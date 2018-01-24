@@ -6,32 +6,33 @@ let _data
 const subscribers = {}
 let timer
 
+const btoa = str => Buffer.from(str).toString('base64')
+
 const getInterval = () => (+window.localStorage.getItem('updateInterval') || 5000)
 
-const getHeaders = () => {
-  return {
-    Cookie: _.map({
-      apiKey: window.localStorage.getItem('apiKey'),
-      secretKey: window.localStorage.getItem('secretKey')
-    }, (value, key) => [key, value].join('=')).join(';')
-  }
-}
-
 const getQuery = () => ({
-  d: window.localStorage.getItem('denominators') || '[]',
-  c: window.localStorage.getItem('coins') || '[]',
-  v: window.localStorage.getItem('conversions') || '[]'
+  e: true,
+  d: btoa(window.localStorage.getItem('denominators') || '[]'),
+  c: btoa(window.localStorage.getItem('coins') || '[]'),
+  v: btoa(window.localStorage.getItem('conversions') || '[]')
 })
 
 const getData = () => new Promise((resolve, reject) => {
   request({
     uri: '/api/data',
-    qs: getQuery(),
-    headers: getHeaders()
+    qs: getQuery()
   }, (error, response, body) => {
-    if (error) return reject(error)
-    if (typeof body === 'string') return reject(body)
-    resolve(JSON.parse(body))
+    if (error) {
+      stop()
+      return reject(error)
+    }
+    try {
+      body = JSON.parse(body)
+    } catch (error) {
+      stop()
+      return reject(error)
+    }
+    resolve(body)
   })
 })
 

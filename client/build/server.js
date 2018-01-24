@@ -8,8 +8,18 @@ const config = require('./config')
 const LogPlugin = require('./log-plugin')
 const https = require('https')
 const fs = require('fs')
+const proxy = require('http-proxy-middleware');
 
 const app = express()
+
+app.use('/api', proxy({
+	target: 'https://localhost:7777',
+	changeOrigin: true,
+	secure: false,
+	pathRewrite: {
+		'^/api' : ''
+	}
+}));
 
 const port = config.port
 webpackConfig.entry.client = [

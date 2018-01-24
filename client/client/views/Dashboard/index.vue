@@ -4,7 +4,7 @@
 		<h4>Markets</h4>
 		<div id="marketList" class="-bin-list">
 			<div v-for="market in marketAssets" :key="market.symbol">
-				<el-row :gutter="20" :span="6">
+				<el-row>
 					<span style="width: 70px"><label>{{market.symbol}}</label></span>
 					<span data-number>{{market.qty}}</span>
 				</el-row>
@@ -13,18 +13,26 @@
 		<h4>Assets</h4>
 		<div id="assetList" class="-bin-list">
 			<div v-for="coin in coinAssets" :key="coin.symbol">
-				<el-row :gutter="20">
+				<el-row>
 					<span style="width: 70px"><label>{{coin.symbol}}</label></span>
 					<span data-number="positive">{{formatNumber(coin.free)}}</span>
 					<span data-number="negative">{{formatNumber(coin.locked)}}</span>
 				</el-row>
-				<el-row :gutter="20" v-for="pair in coin.pairs" :key="pair.symbol">
-					<el-col :span="4">-></el-col>
-					<el-col :span="5"><div>{{pair.symbol}}</div></el-col>
-					<el-col :span="5"><div>{{formatNumber(pair.price)}}</div></el-col>
-					<el-col :span="5"><div>{{pair.buyAvg ? formatNumber(pair.buyAvg) : 'N/A'}}</div></el-col>
-					<el-col :span="5"><div :data-number="!pair.ratio ? '' : pair.ratio > 1 ? 'positive' : 'negative'">{{pair.buyAvg ? delta(pair.ratio) : 'N/A'}}</div></el-col>
-				</el-row>
+				<div v-for="pair in coin.pairs" :key="pair.symbol">
+					<el-row :gutter="2">
+						<el-col :span="6"><span>{{pair.symbol}}</span></el-col>
+						<el-col :span="6"><span data-number>{{formatNumber(pair.price)}}</span></el-col>
+						<el-col :span="6"><span data-number>{{pair.buyAvg ? formatNumber(pair.buyAvg) : 'N/A'}}</span></el-col>
+						<el-col :span="6"><span :data-number="isFinite(pair.ratio) ? (pair.ratio > 1 ? 'positive' : 'negative') : ''">{{pair.buyAvg ? delta(pair.ratio) : 'N/A'}}</span></el-col>
+					</el-row>
+					<!--<el-row	v-for="conversion in coin.conversions" :key="conversion.symbol">-->
+						<!--<el-col :span="6"><span>{{conversion.symbol}}</span></el-col>-->
+						<!--<el-col :span="6"><span data-number>{{formatNumber(conversion.price)}}</span></el-col>-->
+						<!--<el-col :span="6"><span data-number>{{conversion.buyAvg ? formatNumber(conversion.buyAvg) : 'N/A'}}</span></el-col>-->
+						<!--<el-col :span="6"><span :data-number="isFinite(conversion.ratio) ? (conversion.ratio > 1 ? 'positive' : 'negative') : ''">{{conversion.buyAvg ? delta(conversion.ratio) : 'N/A'}}</span></el-col>-->
+						<!---->
+					<!--</el-row>-->
+				</div>
 			</div>
 		</div>
 
@@ -49,7 +57,7 @@
 			<!--<el-table-column prop="free" label="Free"></el-table-column>-->
 			<!--<el-table-column prop="locked" label="Locked"></el-table-column>-->
 		<!--</el-table>-->
-		{{coinAssets}}
+		{{marketData}}
 	</div>
 </template>
 
@@ -86,7 +94,36 @@
 				return _.map(this.marketData.denominators, (qty, symbol) => ({symbol, qty}));
 			},
 			coinAssets: function () {
-				return _.sortBy(_.map(this.marketData.coins, (data, symbol) => _.assign({symbol}, _.assign({pairs: _.sortBy(_.map(data.symbols, (symbolData, symbol) => _.assign({symbol, ratio: symbolData.price / symbolData.buyAvg}, symbolData)), 'symbol')}, data))), 'symbol');
+				return _.sortBy(
+						_.map(
+								this.marketData.coins,
+								(data, symbol) => _.assign(
+										{symbol},
+										_.assign(
+												{pairs: _.sortBy(
+														_.map(
+																data.symbols,
+																(symbolData, symbol) => _.assign(
+																		{
+																			symbol,
+																			ratio: symbolData.price / symbolData.buyAvg,
+																			converted: _.map(symbolData.converted, conversionData => _.assign(
+																					{
+																				
+																					},
+																					conversionData
+																			))
+																		},
+																		symbolData
+																)
+														),
+														'symbol'
+												)},
+												data
+										)
+								)
+						),
+				'symbol');
 			},
 			allSymbols: function () {
 				return _.map(this.coins, 'symbol');

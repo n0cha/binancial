@@ -26,7 +26,7 @@
 	.el-row {
 		padding: 5px;
 
-		.el-col:first-child span {
+		span:first-child {
 			background: $grey;
 			color: $white;
 		}
@@ -34,9 +34,16 @@
 }
 
 #assetList {
-	.el-row:first-child {
+	> div > .el-row {
 		background: $grey;
 		padding: 5px 10px;
 		border-radius: 5px;
+	}
+	
+	> div > div > .el-row {
+		span {
+			margin: 2px 0;
+			width: 100%;
+		}
 	}
 }
