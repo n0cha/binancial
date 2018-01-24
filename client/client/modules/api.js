@@ -19,7 +19,7 @@ const getQuery = () => ({
 
 const getData = () => new Promise((resolve, reject) => {
   request({
-    uri: '/api/data',
+    uri: `https://${window.location.hostname}/api/data`,
     qs: getQuery()
   }, (error, response, body) => {
     if (error) {

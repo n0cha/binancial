@@ -9,5 +9,5 @@
             },
         ]
     ],
-    "presets": ["es2015", "vue-app", "stage-0"]
+    "presets": ["env", "vue-app"]
 }

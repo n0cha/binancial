@@ -57,7 +57,7 @@
 			<!--<el-table-column prop="free" label="Free"></el-table-column>-->
 			<!--<el-table-column prop="locked" label="Locked"></el-table-column>-->
 		<!--</el-table>-->
-		{{marketData}}
+		<!--{{marketData}}-->
 	</div>
 </template>
 

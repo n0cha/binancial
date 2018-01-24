@@ -28,7 +28,7 @@ router.get('/data', (req, res) => {
 	_.assign(config, {
 		coins: JSON.parse(req.query.c),
 		denominators: JSON.parse(req.query.d),
-		conversions: JSON.parse(req.query.v),
+		conversions: JSON.parse(req.query.v)
 	});
 	binance.getData(config)
 			.then(data => {
