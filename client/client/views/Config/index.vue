@@ -85,12 +85,10 @@
 		},
 		watch: {
 			apiKey: function (value) {
-				// this.$cookies.set('apiKey', value, null, null, null, true)
-				this.$cookies.set('apiKey', value)
+				this.$cookies.set('apiKey', value, null, null, null, true)
 			},
 			secretKey: function (value) {
-				// this.$cookies.set('secretKey', value, null, null, null, true)
-				this.$cookies.set('secretKey', value)
+				this.$cookies.set('secretKey', value, null, null, null, true)
 			},
 			denominators: value => localStorage.setItem('denominators', JSON.stringify(value)),
 			coins: value => localStorage.setItem('coins', JSON.stringify(value)),
