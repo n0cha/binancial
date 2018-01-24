@@ -1,25 +1,29 @@
 <template>
 	<div>
+		<el-alert v-if="notification" title="Error requesting data" type="error" :description="notification" show-icon></el-alert>
 		<h4>Markets</h4>
-		<el-table :data="marketAssets" style="width: 100%">
-			<el-table-column prop="symbol" label="Symbol"></el-table-column>
-			<el-table-column prop="qty" label="Owned"></el-table-column>
-		</el-table>
-		<h4>Assets</h4>
-		<div id="assetList">
-			<div v-for="coin in coinAssets">
-				<el-row :gutter="20">
-					<el-col :span="6"><div class="grid-content">{{coin.symbol}}</div></el-col>
-					<el-col :span="6">{{coin.total}}</el-col>
-					<el-col :span="6">{{coin.free}}</el-col>
-					<el-col :span="6">{{coin.locked}}</el-col>
+		<div id="marketList" class="-bin-list">
+			<div v-for="market in marketAssets" :key="market.symbol">
+				<el-row :gutter="20" :span="6">
+					<span style="width: 70px"><label>{{market.symbol}}</label></span>
+					<span data-number>{{market.qty}}</span>
 				</el-row>
-				<el-row :gutter="20" v-for="pair in coin.pairs">
+			</div>
+		</div>
+		<h4>Assets</h4>
+		<div id="assetList" class="-bin-list">
+			<div v-for="coin in coinAssets" :key="coin.symbol">
+				<el-row :gutter="20">
+					<span style="width: 70px"><label>{{coin.symbol}}</label></span>
+					<span data-number="positive">{{formatNumber(coin.free)}}</span>
+					<span data-number="negative">{{formatNumber(coin.locked)}}</span>
+				</el-row>
+				<el-row :gutter="20" v-for="pair in coin.pairs" :key="pair.symbol">
 					<el-col :span="4">-></el-col>
-					<el-col :span="5"><div class="grid-content">{{pair.symbol}}</div></el-col>
-					<el-col :span="5"><div class="grid-content">{{pair.price}}</div></el-col>
-					<el-col :span="5"><div class="grid-content">{{pair.buyAvg}}</div></el-col>
-					<el-col :span="5"><div class="grid-content" :data-positive="pair.ratio >= 1 ? 'true' : 'false'">{{delta(pair.ratio)}}</div></el-col>
+					<el-col :span="5"><div>{{pair.symbol}}</div></el-col>
+					<el-col :span="5"><div>{{formatNumber(pair.price)}}</div></el-col>
+					<el-col :span="5"><div>{{pair.buyAvg ? formatNumber(pair.buyAvg) : 'N/A'}}</div></el-col>
+					<el-col :span="5"><div :data-number="!pair.ratio ? '' : pair.ratio > 1 ? 'positive' : 'negative'">{{pair.buyAvg ? delta(pair.ratio) : 'N/A'}}</div></el-col>
 				</el-row>
 			</div>
 		</div>
@@ -61,9 +65,21 @@
 		},
 		methods: {
 			update: function (data) {
-				this.marketData = data;
+				switch (typeof data) {
+					case 'object':
+						this.marketData = data;
+						break;
+					case 'string':
+						this.notification = data;
+						break;
+				}
 			},
-			delta: value => (value < 1) ? `-${_.round((1 - value) * 100, 2)}%` : `+${_.round((value - 1) * 100, 2)}%`
+			delta: value => (value < 1) ? `-${_.round((1 - value) * 100, 2)}%` : `+${_.round((value - 1) * 100, 2)}%`,
+			formatNumber: value => {
+				value = String(value).split('.');
+				value[1] = _.padEnd(value[1], 8, '0');
+				return value.join('.');
+			}
 		},
 		computed: {
 			marketAssets: function () {
@@ -78,6 +94,7 @@
 		},
 		data() {
 			return {
+				notification: '',
 				expandedCoins: [],
 				markets: ['BTC', 'ETH', 'BNB', 'USDT'],
 				apiKey: this.$cookies.get('apiKey'),

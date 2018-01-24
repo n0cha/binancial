@@ -6,8 +6,15 @@ let _data
 const subscribers = {}
 let timer
 
-const getInterval = () => {
-  return (+window.localStorage.getItem('updateInterval') || 5000)
+const getInterval = () => (+window.localStorage.getItem('updateInterval') || 5000)
+
+const getHeaders = () => {
+  return {
+    Cookie: _.map({
+      apiKey: window.localStorage.getItem('apiKey'),
+      secretKey: window.localStorage.getItem('secretKey')
+    }, (value, key) => [key, value].join('=')).join(';')
+  }
 }
 
 const getQuery = () => ({
@@ -17,16 +24,25 @@ const getQuery = () => ({
 })
 
 const getData = () => new Promise((resolve, reject) => {
-  request({ uri: 'https://localhost:7777/data', qs: getQuery() }, (error, response, body) => {
+  request({
+    uri: '/api/data',
+    qs: getQuery(),
+    headers: getHeaders()
+  }, (error, response, body) => {
     if (error) return reject(error)
+    if (typeof body === 'string') return reject(body)
     resolve(JSON.parse(body))
   })
 })
 
 const setData = data => _data = data
 
-const notify = data => {
+const relayData = data => {
   _.each(subscribers, cb => cb(data))
+}
+
+const notify = msg => {
+  _.each(subscribers, cb => cb(msg))
 }
 
 const update = () => {
@@ -34,8 +50,9 @@ const update = () => {
   if (!running) return
   getData()
 			.then(setData)
-			.then(notify)
+			.then(relayData)
 			.then(delayedUpdate)
+			.catch(notify)
 }
 
 const delayedUpdate = () => {

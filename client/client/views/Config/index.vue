@@ -2,8 +2,8 @@
 	<el-form ref="form" label-width="120px">
 		<el-form-item label="">
 			<div class="info"><p>
-				The API key and Secret key are not stored on the server. They're stored locally in a secure cookie, but they do
-				pass to the server with each request, protected by HTTPS encryption. Despite this, make sure the key pair you
+				The API key and Secret key are not stored on the server. They're stored locally, but they do pass to the server
+				with each request, as a secure cookie, protected by HTTPS encryption. Despite this, make sure the key pair you
 				supply here is limited to read access.
 			</p></div>
 		</el-form-item>
@@ -53,7 +53,8 @@
 			<el-button @click="addConversion">Add</el-button>
 		</el-form-item>
 		<el-form-item label="Update interval">
-			<el-input-number v-model="updateInterval" :min="1000" :step="500"></el-input-number> ms
+			<el-input-number v-model="updateInterval" :min="1000" :step="500"></el-input-number>
+			ms
 		</el-form-item>
 	</el-form>
 </template>
@@ -67,8 +68,8 @@
 		data() {
 			return {
 				markets: ['BTC', 'ETH', 'BNB', 'USDT'],
-				apiKey: this.$cookies.get('apiKey'),
-				secretKey: this.$cookies.get('secretKey'),
+				apiKey: localStorage.getItem('apiKey'),
+				secretKey: localStorage.getItem('secretKey'),
 				denominators: JSON.parse(localStorage.getItem('denominators') || '[]'),
 				coins: JSON.parse(localStorage.getItem('coins') || '[]'),
 				conversions: JSON.parse(localStorage.getItem('conversions') || '[]'),
@@ -83,12 +84,8 @@
 			}
 		},
 		watch: {
-			apiKey: function (value) {
-				this.$cookies.set('apiKey', value, null, null, null, true)
-			},
-			secretKey: function (value) {
-				this.$cookies.set('apiKey', value, null, null, null, true)
-			},
+			apiKey: value => localStorage.setItem('apiKey', value),
+			secretKey: value => localStorage.setItem('secretKey', value),
 			denominators: value => localStorage.setItem('denominators', JSON.stringify(value)),
 			coins: value => localStorage.setItem('coins', JSON.stringify(value)),
 			conversions: value => localStorage.setItem('conversions', JSON.stringify(value)),

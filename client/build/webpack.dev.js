@@ -27,4 +27,11 @@ base.plugins.push(
   new FriendlyErrors()
 )
 
+base.devServer = {
+	proxy: {
+		'/api': 'https://localhost:7777'
+	},
+  https: true
+}
+
 module.exports = base

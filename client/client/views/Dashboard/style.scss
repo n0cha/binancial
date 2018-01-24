@@ -1,8 +1,42 @@
-#assetList {
-	[data-positive=true] {
+.-bin-list {
+	[data-number] {
+		text-align: right;
+	}
+	[data-number=positive] {
 		color: $positive;
 	}
-	[data-positive=false] {
+	[data-number=negative] {
 		color: $negative;
+	}
+
+	span {
+		display: inline-block;
+		border-radius: 5px;
+		padding: 5px 10px;
+		border: 1px solid $grey;
+		background: $white;
+	}
+
+	label {
+		font-weight: bold;
+	}
+}
+
+#marketList {
+	.el-row {
+		padding: 5px;
+
+		.el-col:first-child span {
+			background: $grey;
+			color: $white;
+		}
+	}
+}
+
+#assetList {
+	.el-row:first-child {
+		background: $grey;
+		padding: 5px 10px;
+		border-radius: 5px;
 	}
 }

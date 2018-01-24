@@ -93,7 +93,11 @@ const recvWindow = 30000;
 					const result = {};
 					return Promise.all(_.map(denominators, denominator => {
 						const symbol = `${coin}${denominator}`;
-						const price = (+_.find(priceData, {symbol}).price);
+						const symbolPriceData = _.find(priceData, {symbol});
+						if (!symbolPriceData) {
+							return;
+						}
+						const price = (+symbolPriceData.price);
 						return getSymbolData({symbol, denominator, price, assetQty})
 								.then(symbolData => {
 									result[symbol] = symbolData;
