@@ -19,8 +19,9 @@
     }
 
     @include respond-to('lg') {
-        width: calc(100% - #{$sidebar-size});
-        transform: translate3d($sidebar-size, 0, 0)!important;
+        //width: calc(100% - #{$sidebar-size});
+        width: 100%;
+        //transform: translate3d($sidebar-size, 0, 0)!important;
     }
 
     .el-menu {
@@ -62,6 +63,27 @@
         line-height: 60px;
         @include respond-to('lg') {
             margin-left: 24px;
+        }
+    }
+
+    .-bin-bigIconButton {
+        background: none;
+        border: none;
+        color: $white;
+        float: right;
+        padding: 4px;
+        border-radius: 24px;
+        width: 48px;
+        height: 48px;
+        margin: 6px;
+        transition: all 0.5s ease;
+
+        &:hover {
+            background: $grey;
+        }
+
+        i {
+            font-size: 40px;
         }
     }
 }

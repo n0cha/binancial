@@ -15,6 +15,12 @@
 				<el-menu-item index="4-3">item three</el-menu-item>
 			</el-submenu>
 -->
+			<el-button :round="true" size="medium" class="-bin-bigIconButton" @click="nav('/config')">
+				<i class="md-icon">settings</i>
+			</el-button>
+			<el-button :round="true" size="medium" class="-bin-bigIconButton" @click="nav('/')">
+				<i class="md-icon">keyboard_arrow_left</i>
+			</el-button>
 		</el-menu>
 	</el-header>
 </template>
@@ -22,7 +28,12 @@
 <script>
 	export default {
 		name: 'Header',
-		props: ['openSidebar', 'title']
+		props: ['openSidebar', 'title'],
+		methods: {
+			nav(path) {
+				this.$router.push(path);
+			}
+		}
 	}
 </script>
 

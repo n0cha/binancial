@@ -13,7 +13,7 @@ const proxy = require('http-proxy-middleware');
 const app = express()
 
 app.use('/api', proxy({
-	target: 'https://localhost:7777',
+	target: 'http://localhost:7777',
 	changeOrigin: true,
 	secure: false,
 	pathRewrite: {
@@ -68,11 +68,13 @@ app.get('*', (req, res) => {
   })
 })
 
-const options = {
-	key: fs.readFileSync('../server/ssl/key.pem'),
-	cert: fs.readFileSync('../server/ssl/cert.pem'),
-	requestCert: false,
-	rejectUnauthorized: false
-};
+// const options = {
+// 	key: fs.readFileSync('../server/ssl/key.pem'),
+// 	cert: fs.readFileSync('../server/ssl/cert.pem'),
+// 	requestCert: false,
+// 	rejectUnauthorized: false
+// };
+//
+// https.createServer(options, app).listen(port)
 
-https.createServer(options, app).listen(port)
+app.listen(port);

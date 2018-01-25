@@ -1,7 +1,7 @@
 <template>
 	<div id="app">
 		<el-container class="page-layout" direction="horizontal">
-			<sidebar-component :active="sidebarOpened"/>
+			<!--<sidebar-component :active="sidebarOpened"/>-->
 			<el-container class="page-layout-inner" direction="vertical">
 				<header-component :openSidebar="openSidebar" :title="title"/>
 				<el-main>

@@ -26,8 +26,9 @@ body {
             width: 100%;
             transform: translate3d(0, 0, 0)!important;
             @include respond-to('lg') {
-                width: calc(100% - #{$sidebar-size}); //
-                transform: translate3d($sidebar-size, 0, 0)!important; //
+                //width: calc(100% - #{$sidebar-size}); //
+                width: 100%; //
+                //transform: translate3d($sidebar-size, 0, 0)!important; //
             }
             .main-content {
                 width: 100%;
@@ -36,7 +37,7 @@ body {
                     margin: 0 auto;
                 }
                 .container {
-                    margin-top: 0;
+                    margin: 0 auto;
                     max-width: 1140px;
                     padding: 0 20px;
                     > div:first-child {
