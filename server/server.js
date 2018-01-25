@@ -19,13 +19,15 @@ app.use('/', root);
 
 root.use('/', require('./lib/router.js'));
 
-const options = {
-	key: fs.readFileSync('ssl/privkey1.pem'),
-	cert: fs.readFileSync('ssl/fullchain1.pem'),
-	requestCert: false,
-	rejectUnauthorized: false
-};
+// const options = {
+// 	key: fs.readFileSync('ssl/privkey1.pem'),
+// 	cert: fs.readFileSync('ssl/fullchain1.pem'),
+// 	requestCert: false,
+// 	rejectUnauthorized: false
+// };
+//
+// https.createServer(options, app).listen(port);
 
-https.createServer(options, app).listen(port);
+app.listen(port);
 
-console.log(`Server listening on https://localhost:${port}`);
+console.log(`Server listening on http://localhost:${port}`);
