@@ -8,6 +8,9 @@
 	[data-number=negative] {
 		color: $negative;
 	}
+	[data-number=dimmed] {
+		color: $light;
+	}
 
 	span {
 		display: inline-block;
@@ -15,20 +18,33 @@
 		padding: 5px 10px;
 		border: 1px solid $grey;
 		background: $white;
+		transition: all 0.5s ease;
+		cursor: pointer;
+
+		&:hover {
+			background: $highlight;
+			border: 1px solid $dark;
+			color: $black;
+		}
 	}
 
 	label {
 		font-weight: bold;
+		cursor: inherit;
 	}
 }
 
 #marketList {
 	.el-row {
-		padding: 5px;
+		padding: 5px 10px;
 
 		span:first-child {
 			background: $grey;
 			color: $white;
+		}
+
+		span {
+			width: 160px;
 		}
 	}
 }
@@ -38,6 +54,10 @@
 		background: $grey;
 		padding: 5px 10px;
 		border-radius: 5px;
+
+		span {
+			width: 160px;
+		}
 	}
 	
 	> div > div > .el-row {

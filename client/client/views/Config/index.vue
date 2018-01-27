@@ -13,6 +13,11 @@
 		<el-form-item label="Secret key">
 			<el-input v-model="secretKey"></el-input>
 		</el-form-item>
+		<el-form-item label="Currency">
+			<el-select v-model="currency" placeholder="please select your zone">
+				<el-option v-for="currency in currencies" :key="currency" :value="currency"></el-option>
+			</el-select>
+		</el-form-item>
 		<el-form-item label="Markets">
 			<el-checkbox-group v-model="denominators">
 				<el-checkbox v-for="market in markets" :key="market" :label="market" border></el-checkbox>
@@ -32,6 +37,7 @@
 			<el-input v-model="symbol" style="width:100px" @keyup.enter.native="addSymbol"></el-input>
 			<el-button @click="addSymbol">Add</el-button>
 		</el-form-item>
+<!--
 		<el-form-item label="Conversions">
 			<el-table :data="conversions" style="width: 100%">
 				<el-table-column prop="from" label="From"></el-table-column>
@@ -52,6 +58,7 @@
 			</el-select>
 			<el-button @click="addConversion">Add</el-button>
 		</el-form-item>
+-->
 		<el-form-item label="Update interval">
 			<el-input-number v-model="updateInterval" :min="1000" :step="500"></el-input-number>
 			ms
@@ -61,10 +68,11 @@
 
 <script>
 	import _ from 'lodash'
+	import ElSelectDropdown from 'element-ui/packages/select/src/select-dropdown'
 	
 	export default {
 		name: 'Configuration',
-		components: {},
+		components: {ElSelectDropdown},
 		data() {
 			return {
 				markets: ['BTC', 'ETH', 'BNB', 'USDT'],
@@ -75,7 +83,9 @@
 				conversions: JSON.parse(localStorage.getItem('conversions') || '[]'),
 				updateInterval: localStorage.getItem('updateInterval') || 5000,
 				symbol: '',
-				conversion: {}
+				conversion: {},
+				currencies: ['USD', 'AUD', 'BRL', 'CAD', 'CHF', 'CLP', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HUF', 'IDR', 'ILS', 'INR', 'JPY', 'KRW', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PKR', 'PLN', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'TWD', 'ZAR'],
+				currency: localStorage.getItem('currency') || 'USD'
 			}
 		},
 		computed: {
@@ -93,7 +103,8 @@
 			denominators: value => localStorage.setItem('denominators', JSON.stringify(value)),
 			coins: value => localStorage.setItem('coins', JSON.stringify(value)),
 			conversions: value => localStorage.setItem('conversions', JSON.stringify(value)),
-			updateInterval: value => localStorage.setItem('updateInterval', value)
+			updateInterval: value => localStorage.setItem('updateInterval', value),
+			currency: value => localStorage.setItem('currency', value)
 		},
 		methods: {
 			addSymbol() {

@@ -1,25 +1,18 @@
 <template>
 	<el-header>
 		<el-menu mode="horizontal">
-			<el-menu-item class="header-navicon" index="1">
-				<el-button type="text" @click="openSidebar">
-					<i class="md-icon">menu</i>
-				</el-button>
-			</el-menu-item>
 			<span class="header-title">{{title}}</span>
-<!--
-			<el-submenu class="header-menu" index="3">
-				<template slot="title">Workspace</template>
-				<el-menu-item index="4-1">item one</el-menu-item>
-				<el-menu-item index="4-2">item two</el-menu-item>
-				<el-menu-item index="4-3">item three</el-menu-item>
-			</el-submenu>
--->
-			<el-button :round="true" size="medium" class="-bin-bigIconButton" @click="nav('/config')">
+			<el-button :round="true" size="medium" class="-bin-bigIcon" @click="nav('/config')" v-tooltip="'Configuration'">
 				<i class="md-icon">settings</i>
 			</el-button>
-			<el-button :round="true" size="medium" class="-bin-bigIconButton" @click="nav('/')">
+			<el-button :round="true" size="medium" class="-bin-bigIcon" @click="nav('/')" v-tooltip="'Dashboard'">
 				<i class="md-icon">keyboard_arrow_left</i>
+			</el-button>
+			<span v-if="$store.state.connectionState === 500" class="-bin-bigIcon -bin-flash" v-tooltip="'There\'s a problem communicating with the server'">
+				<i class="md-icon">cloud_off</i>
+			</span>
+			<el-button v-if="$store.state.connectionState === 400" class="-bin-bigIcon -bin-flash" v-tooltip="'Your credentials are incorrect, please set API key and Secret Key in the configuration'" @click="nav('/config')">
+				<i class="md-icon">lock</i>
 			</el-button>
 		</el-menu>
 	</el-header>

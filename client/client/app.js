@@ -12,15 +12,17 @@ import 'whatwg-fetch' // polyfill
 import 'material-design-icons' // material icons, because Element-UI icons set is incomplete
 import 'styles/index.scss' // require styles using webpack alias
 import VueCookies from 'vue-cookies'
+import VTooltip from 'v-tooltip'
 
 sync(store, router)
 Vue.use(Element, { locale })
 Vue.use(VueCookies)
+Vue.use(VTooltip)
 
 const app = new Vue({
-  router,
-  store,
-  ...App
+	router,
+	store,
+	...App
 })
 
 export { app, router, store }

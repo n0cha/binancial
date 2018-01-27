@@ -1,3 +1,9 @@
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
 .el-header {
     z-index: 6;
     background-color: $dark;
@@ -66,7 +72,7 @@
         }
     }
 
-    .-bin-bigIconButton {
+    .-bin-bigIcon {
         background: none;
         border: none;
         color: $white;
@@ -75,7 +81,7 @@
         border-radius: 24px;
         width: 48px;
         height: 48px;
-        margin: 6px;
+        margin: 6px 3px;
         transition: all 0.5s ease;
 
         &:hover {
@@ -85,5 +91,13 @@
         i {
             font-size: 40px;
         }
+
+        &.-bin-flash i {
+            animation: flash ease 1s infinite;
+        }
+    }
+
+    span.-bin-bigIcon {
+        cursor: default;
     }
 }

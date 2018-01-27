@@ -12,7 +12,7 @@ const conversions = [
 	{from: 'BTC', to: 'ETH'}
 ];
 
-const lib = require('./lib/binance.js')({_, CryptoJS, request});
+const lib = require('./lib/binance.old.js')({_, CryptoJS, request});
 
 lib.getData({coins, apiKey, secretKey, denominators, conversions})
 		.then(result => {

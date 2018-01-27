@@ -8,7 +8,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node_modules/forever/bin/forever start server.js",
-    "stop": "node_modules/forever/bin/forever stop server.js"
+    "stop": "node_modules/forever/bin/forever stop server.js",
+    "restart": "npm run stop && npm run start",
+    "update": "npm run stop && git pull && npm run start"
   },
   "dependencies": {
     "body-parser": "^1.18.2",

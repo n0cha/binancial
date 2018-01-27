@@ -5,8 +5,6 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const noCache = require('nocache');
 const cors = require('cors')
-const https = require('https');
-const fs = require('fs');
 
 const port = argv.port || 7777;
 const root = express.Router();
@@ -18,15 +16,6 @@ app.use(noCache());
 app.use('/', root);
 
 root.use('/', require('./lib/router.js'));
-
-// const options = {
-// 	key: fs.readFileSync('ssl/privkey1.pem'),
-// 	cert: fs.readFileSync('ssl/fullchain1.pem'),
-// 	requestCert: false,
-// 	rejectUnauthorized: false
-// };
-//
-// https.createServer(options, app).listen(port);
 
 app.listen(port);
 
