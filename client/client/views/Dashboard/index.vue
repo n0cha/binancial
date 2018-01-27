@@ -86,15 +86,10 @@
 				this.marketData = data
 			},
 			delta: value => (value < 1) ? `-${_.round((1 - value) * 100, 2)}%` : `+${_.round((value - 1) * 100, 2)}%`,
-			formatNumber: value => {
-				value = String(value).split('.')
-				value[1] = _.padEnd(value[1], 8, '0')
-				return value.join('.')
-			},
+			formatNumber: value => value.toFixed(8),
 			formatCurrency: function (value) {
-				value = String(value).split('.')
-				value[1] = _.padEnd(value[1], 2, '0')
-				return `${this.currencySymbol} ${value.join('.')}`
+				value = _.round(value, 2).toFixed(2)
+				return `${this.currencySymbol} ${value}`
 			}
 		},
 		computed: {
