@@ -15,7 +15,7 @@
     "lint": "eslint client/* --ext .js --ext .vue",
     "generate_default_styles": "et -i ./client/styles/element-variables.css",
     "generate_theme": "et -c ./client/styles/element-variables.css",
-    "update": "git pull && npm run build"
+    "update": "git pull && npm install && npm run build"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
