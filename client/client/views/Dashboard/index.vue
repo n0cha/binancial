@@ -118,7 +118,7 @@
 		},
 		data() {
 			return {
-				currencySymbol: localStorage.getItem('currency'),
+				currencySymbol: localStorage.getItem('currency') || 'USD',
 				notification: '',
 				expandedCoins: [],
 				markets: ['BTC', 'ETH', 'BNB', 'USDT'],
