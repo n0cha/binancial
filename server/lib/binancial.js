@@ -16,6 +16,11 @@ const getCoinValue = (data, symbol, currency = 'USD') => {
 	return (+_.find(data.values, {symbol})[`price_${currency.toLowerCase()}`]);
 };
 
+const getCoinChange = (data, symbol) => {
+	symbol = coinMarketCap.mapSymbol(symbol);
+	return (+_.find(data.values, {symbol}).percent_change_24h);
+};
+
 const getSymbolPrice = (data, symbol) => {
 	return (+_.find(data.prices, {symbol}).price);
 };
@@ -23,13 +28,15 @@ const getSymbolPrice = (data, symbol) => {
 const getCoinData = (data, symbol, currency) => {
 	const balance = getBalance(data, symbol);
 	const value = getCoinValue(data, symbol, currency);
+	const change = getCoinChange(data, symbol);
 	return {
 		symbol,
 		value,
 		freeQty: balance.free,
 		lockedQty: balance.locked,
 		totalQty: balance.total,
-		totalValue: _.round(balance.total * value, 2)
+		totalValue: _.round(balance.total * value, 2),
+		change
 	};
 };
 
@@ -94,6 +101,10 @@ const getCoinRelevantTradeData = (data, coinSymbol, markets) => {
 	return result;
 };
 
+const getSymbolChange = (data, symbol) => {
+	return +data.change[symbol].priceChangePercent;
+};
+
 const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 	return _.map(coins, coinSymbol => {
 		const coinData = getCoinData(data, coinSymbol, currency);
@@ -107,7 +118,8 @@ const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 					marketSymbol,
 					currentPrice: getSymbolPrice(data, tradeSymbol),
 					avgBuyPrice: coinTradeData[tradeSymbol].averagePrice,
-					boughtQty: coinTradeData[tradeSymbol].sumQty
+					boughtQty: coinTradeData[tradeSymbol].sumQty,
+					change: getSymbolChange(data, tradeSymbol)
 				};
 			})
 		});
@@ -131,9 +143,13 @@ module.exports = {
 					.filter(symbol => _.find(data.prices, {symbol}))
 					.value();
 			
-			return Promise.all(_.map(symbols, bin.getTrades))
-					.then(tradesData => {
+			return Promise.all([
+				Promise.all(_.map(symbols, bin.getTrades)),
+				Promise.all(_.map(symbols, bin.getChange))
+			])
+					.then(([tradesData, changeData]) => {
 						data.trades = _.zipObject(symbols, tradesData);
+						data.change = _.zipObject(symbols, changeData);
 						return data;
 					});
 		}).then(data => {

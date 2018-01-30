@@ -25,11 +25,26 @@
 		background: $white;
 		transition: all 0.5s ease;
 		cursor: pointer;
+		position: relative;
 
 		&:hover {
 			background: $highlight;
 			border: 1px solid $dark;
 			color: $black;
+		}
+
+		.-bin-change {
+			position: absolute;
+			left: 2px;
+			top: 2px;
+
+			&.-bin-change-up {
+				color: $positive;
+			}
+
+			&.-bin-change-down {
+				color: $negative;
+			}
 		}
 	}
 

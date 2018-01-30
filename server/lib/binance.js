@@ -36,6 +36,7 @@ module.exports = ({apiKey, secretKey}) => {
 	return {
 		getPrices: () => apiRequest('api/v1/ticker/allPrices'),
 		getAccountData: () => apiRequest('api/v3/account', {}, true),
-		getTrades: symbol => apiRequest('api/v3/myTrades', {symbol}, true)
+		getTrades: symbol => apiRequest('api/v3/myTrades', {symbol}, true),
+		getChange: symbol => apiRequest('api/v1/ticker/24hr', {symbol})
 	};
 };

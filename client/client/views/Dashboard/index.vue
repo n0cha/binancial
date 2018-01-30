@@ -17,7 +17,10 @@
 						<el-row>
 							<span class="-bin-cell" style="width: 70px"><label>{{market.symbol}}</label></span>
 							<span class="-bin-cell" data-number v-tooltip="'Total amount of this coin you own'">{{market.totalQty}}</span>
-							<span class="-bin-cell" data-number v-tooltip="'Current value of this coin'">{{formatCurrency(market.value)}}</span>
+							<span class="-bin-cell" data-number v-tooltip="'Current value of this coin'">
+								<i class="md-icon -bin-change" :class="'-bin-change-' + trend(market.change)">trending_{{trend(market.change)}}</i>
+								{{formatCurrency(market.value)}}
+							</span>
 							<span class="-bin-cell" data-number v-tooltip="'Estimated value of your assets in this coin'">{{formatCurrency(market.totalValue)}}</span>
 							<span class="-bin-cell" data-number="dimmed" v-tooltip="'Potential quantity if all coins below are converted to this asset'">{{market.potentialQty}}</span>
 							<span class="-bin-cell" data-number="dimmed" v-tooltip="'Potential value if all coins below are converted to this asset'">{{formatCurrency(market.potentialValue)}}</span>
@@ -38,7 +41,10 @@
 							<span class="-bin-operator">+</span>
 							<span class="-bin-cell" data-number="negative" v-tooltip="'Amount of this coin you own locked in an order'">{{formatNumber(coin.lockedQty)}}</span>
 							<span class="-bin-operator">) x</span>
-							<span class="-bin-cell" data-number v-tooltip="'Current value of this coin'">{{formatCurrency(coin.value)}}</span>
+							<span class="-bin-cell" data-number v-tooltip="'Current value of this coin'">
+								<i class="md-icon -bin-change" :class="'-bin-change-' + trend(coin.change)">trending_{{trend(coin.change)}}</i>
+								{{formatCurrency(coin.value)}}
+							</span>
 							<span class="-bin-operator">=</span>
 							<span class="-bin-cell" data-number v-tooltip="'Value of your total assets in this coin'">{{formatCurrency(coin.totalValue)}}</span>
 						</el-row>
@@ -48,7 +54,12 @@
 								<el-col :span="5"><span class="-bin-cell" data-number v-tooltip="'Quantity of your current assets in this coin bought through this market'">{{formatNumber(pair.boughtQty)}}</span></el-col>
 								<el-col :span="5"><span class="-bin-cell" data-number v-tooltip="'Average price paid for your current assets in this coin through this market'">{{pair.avgBuyPrice ? formatNumber(pair.avgBuyPrice) : 'N/A'}}</span>
 								</el-col>
-								<el-col :span="5"><span class="-bin-cell" data-number v-tooltip="'Current price of this coin in this market'">{{formatNumber(pair.currentPrice)}}</span></el-col>
+								<el-col :span="5">
+									<span class="-bin-cell" data-number v-tooltip="'Current price of this coin in this market'">
+										<i class="md-icon -bin-change" :class="'-bin-change-' + trend(pair.change)">trending_{{trend(pair.change)}}</i>
+										{{formatNumber(pair.currentPrice)}}
+									</span>
+								</el-col>
 								<el-col :span="4"><span class="-bin-cell"
 										:data-number="isFinite(pair.ratio) ? (pair.ratio > 1 ? 'positive' : 'negative') : ''"
 										v-tooltip="'Current profit margin'">{{pair.avgBuyPrice ? delta(pair.ratio) : 'N/A'}}</span>
@@ -82,6 +93,7 @@
 			api.subscribe('dashboard', this.update.bind(this))
 		},
 		methods: {
+			trend: change => change > 1 ? 'up' : (change < 1 ? 'down' : 'flat'),
 			update: function (data) {
 				if (data instanceof Error) {
 					this.$store.commit('setConnectionState', +data.message)
