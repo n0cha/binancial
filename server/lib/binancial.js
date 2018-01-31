@@ -22,7 +22,7 @@ const getCoinChange = (data, symbol) => {
 };
 
 const getSymbolPrice = (data, symbol) => {
-	return (+_.find(data.prices, {symbol}).price);
+	return data.prices[symbol];
 };
 
 const getCoinData = (data, symbol, currency) => {
@@ -102,7 +102,23 @@ const getCoinRelevantTradeData = (data, coinSymbol, markets) => {
 };
 
 const getSymbolChange = (data, symbol) => {
-	return +data.change[symbol].priceChangePercent;
+	return +(data.change[symbol] || {}).priceChangePercent;
+};
+
+const getConversions = (coinData, conversions, coinSymbol, marketSymbol) => {
+	return _(conversions).filter({to: marketSymbol}).map(conversion => {
+		const buyAvg = _.find(coinData.trades, {marketSymbol: conversion.from}).avgBuyPrice;
+		return {
+			conversionSymbol: conversion.symbol,
+			convertedAvgBuyPrice: _.round(buyAvg * conversion.rate, 8)
+		};
+	}).value();
+};
+
+const setConversions = (coinData, conversions) => {
+	_.each(coinData.trades, tradeData => {
+		tradeData.conversions = getConversions(coinData, conversions, coinData.symbol, tradeData.marketSymbol);
+	});
 };
 
 const getCoinsData = ({coins, markets, conversions, currency}, data) => {
@@ -110,7 +126,7 @@ const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 		const coinData = getCoinData(data, coinSymbol, currency);
 		const coinTradeData = getCoinRelevantTradeData(data, coinSymbol, markets);
 		
-		return _.assign(coinData, {
+		_.assign(coinData, {
 			trades: _.map(markets, marketSymbol => {
 				const tradeSymbol = coinSymbol + marketSymbol;
 				return {
@@ -123,6 +139,23 @@ const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 				};
 			})
 		});
+		
+		// setConversions(coinData, conversions);
+		
+		return coinData;
+	});
+};
+
+const setConversionRates = (conversions, data) => {
+	_.each(conversions, conversion => {
+		let symbol = conversion.from + conversion.to;
+		let rate = getSymbolPrice(data, symbol);
+		if (!conversion.rate) {
+			symbol = conversion.to + conversion.from;
+			rate = 1 / getSymbolPrice(data, symbol);
+		}
+		conversion.rate = rate;
+		conversion.symbol = symbol;
 	});
 };
 
@@ -140,7 +173,7 @@ module.exports = {
 			const symbols = _(coins)
 					.map(coin => _.map(markets, market => coin + market))
 					.flatten()
-					.filter(symbol => _.find(data.prices, {symbol}))
+					.filter(symbol => data.prices[symbol])
 					.value();
 			
 			return Promise.all([
@@ -153,6 +186,7 @@ module.exports = {
 						return data;
 					});
 		}).then(data => {
+			// setConversionRates(conversions, data);
 			return {
 				markets: getMarketsData({markets, coins, conversions, currency}, data),
 				coins: getCoinsData({markets, coins, conversions, currency}, data)

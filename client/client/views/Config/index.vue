@@ -41,7 +41,7 @@
 				<el-input v-model="symbol" style="width:100px" @keyup.enter.native="addSymbol"></el-input>
 				<el-button @click="addSymbol">Add</el-button>
 			</el-form-item>
-	<!--
+<!--
 			<el-form-item label="Conversions">
 				<el-table :data="conversions" style="width: 100%">
 					<el-table-column prop="from" label="From"></el-table-column>
@@ -62,7 +62,7 @@
 				</el-select>
 				<el-button @click="addConversion">Add</el-button>
 			</el-form-item>
-	-->
+-->
 			<el-form-item label="Update interval">
 				<el-input-number v-model="updateInterval" :min="1000" :step="500"></el-input-number>
 				ms

@@ -65,15 +65,17 @@
 										v-tooltip="'Current profit margin'">{{pair.avgBuyPrice ? delta(pair.ratio) : 'N/A'}}</span>
 								</el-col>
 							</el-row>
-	<!--
-							<el-row	v-for="conversion in coin.conversions" :key="conversion.symbol">
-							<el-col :span="6"><span>{{conversion.symbol}}</span></el-col>
-							<el-col :span="6"><span data-number>{{formatNumber(conversion.price)}}</span></el-col>
-							<el-col :span="6"><span data-number>{{conversion.buyAvg ? formatNumber(conversion.buyAvg) : 'N/A'}}</span></el-col>
-							<el-col :span="6"><span :data-number="isFinite(conversion.ratio) ? (conversion.ratio > 1 ? 'positive' : 'negative') : ''">{{conversion.buyAvg ? delta(conversion.ratio) : 'N/A'}}</span></el-col>
-							
+<!--
+							<el-row	:gutter="2" v-for="conversion in pair.conversions" :key="conversion.conversionSymbol">
+								<el-col :span="5">&nbsp;</el-col>
+								<el-col :span="5"><span class="-bin-cell">{{conversion.conversionSymbol}}</span></el-col>
+								<el-col :span="5"><span class="-bin-cell" data-number>{{formatNumber(conversion.convertedAvgBuyPrice)}}</span></el-col>
+								<el-col :span="5">&nbsp;</el-col>
+								<el-col :span="4"><span class="-bin-cell"
+                    :data-number="isFinite(conversion.ratio) ? (conversion.ratio > 1 ? 'positive' : 'negative') : ''"
+								>{{conversion.convertedAvgBuyPrice ? delta(conversion.ratio) : 'N/A'}}</span></el-col>
 							</el-row>
-	-->
+-->
 						</div>
 					</div>
 				</div>
@@ -104,7 +106,7 @@
 				this.marketData = data
 			},
 			delta: value => (value < 1) ? `-${_.round((1 - value) * 100, 2)}%` : `+${_.round((value - 1) * 100, 2)}%`,
-			formatNumber: value => value.toFixed(8),
+			formatNumber: value => _.isNumber(value) ? value.toFixed(8) : 'N/A',
 			formatCurrency: function (value) {
 				value = _.round(value, 2).toFixed(2)
 				return `${this.currencySymbol} ${value}`
@@ -119,7 +121,12 @@
 					return _.assign(coin, {
 						trades: _.map(coin.trades, trade => {
 							return _.assign(trade, {
-								ratio: trade.currentPrice / trade.avgBuyPrice
+								ratio: trade.currentPrice / trade.avgBuyPrice/*,
+								conversions: _.map(trade.conversions, conversion => {
+									return _.assign(conversion, {
+										ratio: trade.currentPrice / conversion.convertedAvgBuyPrice
+									});
+								})*/
 							})
 						})
 					})
