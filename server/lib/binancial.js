@@ -3,11 +3,11 @@ const binance = require('./binance.js');
 const coinMarketCap = require('./coinmarketcap');
 
 const getBalance = (data, symbol) => {
-	const balance = _.find(data.account.balances, {asset: symbol});
+	const balance = _.find(data.account.balances, {asset: symbol}) || {};
 	return _.assign(balance, {
-		free: (+balance.free),
-		locked: (+balance.locked),
-		total: (+balance.free) + (+balance.locked)
+		free: (+balance.free || 0),
+		locked: (+balance.locked || 0),
+		total: (+balance.free) + (+balance.locked) || 0
 	});
 };
 
