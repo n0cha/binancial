@@ -11,6 +11,8 @@ const assets = {};
 const userDataStream = {};
 const tickerStreamSubscriptions = [];
 
+console.log = _.noop;
+
 const connectTickerStream = () => {
 	tickerStream = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
 	
@@ -75,9 +77,11 @@ module.exports = ({apiKey, secretKey}) => {
 			}
 			
 			body = JSON.parse(body);
-			if (endpoint === 'api/v3/account' && (!body || !body.balances || !body.balances.length)) {
-				console.log(body);
+			
+			if (body.code && body.msg) {
+				console.error(uri, body.code, body.msg);
 			}
+			
 			resolve(body);
 		});
 	});
