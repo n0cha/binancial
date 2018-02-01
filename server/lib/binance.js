@@ -53,6 +53,9 @@ module.exports = ({apiKey, secretKey}) => {
 				console.log(error);
 				return reject(error);
 			}
+			if (uri === 'api/v3/account') {
+				console.log(body);
+			}
 			resolve(JSON.parse(body));
 		});
 	});
