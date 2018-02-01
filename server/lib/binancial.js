@@ -3,11 +3,11 @@ const binance = require('./binance.js');
 const coinMarketCap = require('./coinmarketcap');
 
 const getBalance = (data, symbol) => {
-	const balance = _.find(data.account.balances, {asset: symbol}) || {};
+	const balance = _.find(data.account.balances, {asset: symbol});
 	return _.assign(balance, {
-		free: (+balance.free || 0),
-		locked: (+balance.locked || 0),
-		total: (+balance.free) + (+balance.locked) || 0
+		free: _.round(+balance.free, 8),
+		locked: _.round(+balance.locked, 8),
+		total: _.round((+balance.free) + (+balance.locked), 8)
 	});
 };
 
@@ -43,6 +43,8 @@ const getCoinData = (data, symbol, currency) => {
 const getMarketsData = ({markets, coins, currency}, data) => {
 	return _.map(markets, (marketSymbol) => {
 		const coinData = getCoinData(data, marketSymbol, currency);
+		
+		coins = _.without(coins, marketSymbol);
 		
 		const potentialQty = _.round(coinData.totalQty + _.sum(_.map(coins, coinSymbol => {
 			return getBalance(data, coinSymbol).total * getSymbolPrice(data, coinSymbol + marketSymbol);
@@ -127,7 +129,11 @@ const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 		const coinTradeData = getCoinRelevantTradeData(data, coinSymbol, markets);
 		
 		_.assign(coinData, {
-			trades: _.map(markets, marketSymbol => {
+			trades: _.compact(_.map(markets, marketSymbol => {
+				if (coinSymbol === marketSymbol) {
+					return;
+				}
+				
 				const tradeSymbol = coinSymbol + marketSymbol;
 				return {
 					tradeSymbol,
@@ -137,7 +143,7 @@ const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 					boughtQty: coinTradeData[tradeSymbol].sumQty,
 					change: getSymbolChange(data, tradeSymbol)
 				};
-			})
+			}))
 		});
 		
 		// setConversions(coinData, conversions);

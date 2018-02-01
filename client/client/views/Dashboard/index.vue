@@ -31,6 +31,12 @@
 			<el-card>
 				<div slot="header">
 					<span>Coins</span>
+					<div class="-bin-headerControls">
+						<label>Sort by:&nbsp;</label>
+						<el-select v-model="sortBy" placeholder="Sort by">
+							<el-option v-for="option in sortByOptions" :key="option.value" :label="option.label" :value="option.value"></el-option>
+						</el-select>
+					</div>
 				</div>
 				<div id="assetList" class="-bin-list">
 					<div v-for="coin in coinAssets" :key="coin.symbol">
@@ -117,7 +123,7 @@
 				return this.marketData.markets
 			},
 			coinAssets: function () {
-				return _.map(this.marketData.coins, coin => {
+				let coinAssets = _.map(this.marketData.coins, coin => {
 					return _.assign(coin, {
 						trades: _.map(coin.trades, trade => {
 							return _.assign(trade, {
@@ -131,10 +137,21 @@
 						})
 					})
 				})
+				
+				coinAssets =  _.sortBy(coinAssets, this.sortBy)
+				
+				if (coinAssets.length && _.isNumber(coinAssets[0][this.sortBy])) {
+					coinAssets.reverse();
+				}
+				
+				return coinAssets;
 			},
 			allSymbols: function () {
 				return _.map(this.coins, 'symbol')
 			}
+		},
+		watch: {
+			sortBy: value => localStorage.setItem('sortBy', value)
 		},
 		data() {
 			return {
@@ -148,7 +165,16 @@
 				coins: JSON.parse(localStorage.getItem('coins') || '[]'),
 				conversions: JSON.parse(localStorage.getItem('conversions') || '[]'),
 				updateInterval: localStorage.getItem('updateInterval') || 5000,
-				marketData: {}
+				marketData: {},
+				sortBy: localStorage.getItem('sortBy') || 'symbol',
+				sortByOptions: [
+					{label: 'Symbol', value: 'symbol'},
+					{label: 'Total quantity', value: 'totalQty'},
+					{label: 'Free quantity', value: 'freeQty'},
+					{label: 'Locked quantity', value: 'lockedQty'},
+					{label: 'Value', value: 'value'},
+					{label: 'Total value', value: 'totalValue'}
+				]
 			}
 		}
 	}
