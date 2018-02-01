@@ -55,7 +55,7 @@ module.exports = ({apiKey, secretKey}) => {
 			}
 			
 			body = JSON.parse(body);
-			if (endpoint === 'api/v3/account' && (!body || !body.length)) {
+			if (endpoint === 'api/v3/account' && (!body || !body.balances || !body.balances.length)) {
 				console.log(body);
 			}
 			resolve(body);
