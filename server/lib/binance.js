@@ -53,10 +53,12 @@ module.exports = ({apiKey, secretKey}) => {
 				console.log(error);
 				return reject(error);
 			}
-			if (endpoint === 'api/v3/account') {
+			
+			body = JSON.parse(body);
+			if (endpoint === 'api/v3/account' && (!body || !body.length)) {
 				console.log(body);
 			}
-			resolve(JSON.parse(body));
+			resolve(body);
 		});
 	});
 	
