@@ -11,12 +11,25 @@ const assets = {};
 const userDataStream = {};
 const tickerStreamSubscriptions = [];
 
-console.log = _.noop;
+const connectWS = uri => {
+	console.log('connecting', uri);
+	
+	const ws = new WebSocket(uri);
+	
+	ws.on('error', err => {
+		console.error(err);
+		ws.close();
+	});
+	
+	return ws;
+};
 
 const connectTickerStream = () => {
-	tickerStream = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+	tickerStream = connectWS('wss://stream.binance.com:9443/ws/!ticker@arr');
 	
 	tickerStream.on('message', data => {
+		console.log('receiving', 'wss://stream.binance.com:9443/ws/!ticker@arr', data);
+		
 		try {
 			data = JSON.parse(data);
 		} catch (err) {
@@ -70,11 +83,14 @@ module.exports = ({apiKey, secretKey}) => {
 			qs = signRequest(qs);
 		}
 		
+		console.log('request', uri);
 		request({uri, qs, headers, method}, (error, response, body) => {
 			if (error) {
-				console.log(error);
+				console.error(error);
 				return reject(error);
 			}
+			
+			console.log('response', uri, body);
 			
 			body = JSON.parse(body);
 			
@@ -88,14 +104,15 @@ module.exports = ({apiKey, secretKey}) => {
 	});
 	
 	const connectUserDataStream = () => new Promise((resolve, reject) => {
-		console.log('requesting user data listenkey');
+		//console.log('requesting user data listenkey');
 		apiRequest('/api/v1/userDataStream', {}, false, 'POST')
 				.then(({ listenKey }) => {
-					console.log('opening user data stream');
-					userDataStream[apiKey] = new WebSocket('wss://stream.binance.com:9443/ws/' + listenKey);
+					//console.log('opening user data stream');
+					userDataStream[apiKey] = connectWS('wss://stream.binance.com:9443/ws/' + listenKey);
 					
 					userDataStream[apiKey].on('message', data => {
-						console.log('receiving user data');
+						//console.log('receiving user data');
+						console.log('receiving', 'wss://stream.binance.com:9443/ws/' + listenKey, data);
 						
 						data = JSON.parse(data);
 						
@@ -127,10 +144,10 @@ module.exports = ({apiKey, secretKey}) => {
 			return Promise.resolve(assets[apiKey]);
 		}
 		
-		console.log('requesting account data');
+		//console.log('requesting account data');
 		return apiRequest('api/v3/account', {}, true)
 				.then(data => {
-					console.log('processing account data');
+					//console.log('processing account data');
 					
 					assets[apiKey] = assets[apiKey] || {};
 					
