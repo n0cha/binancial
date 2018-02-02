@@ -79,7 +79,8 @@ module.exports = ({apiKey, secretKey}) => {
 			body = JSON.parse(body);
 			
 			if (body.code && body.msg) {
-				console.error(uri, body.code, body.msg);
+				console.error(apiKey, uri, body.code, body.msg);
+				return reject(body.msg);
 			}
 			
 			resolve(body);
