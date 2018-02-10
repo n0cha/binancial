@@ -12,7 +12,7 @@ const tickerStreamSubscriptions = [];
 const userData = {};
 
 const connectWS = uri => {
-	console.log('connecting', uri);
+	// console.log('connecting', uri);
 	
 	const ws = new WebSocket(uri);
 	
@@ -28,7 +28,7 @@ const connectTickerStream = () => {
 	tickerStream = connectWS('wss://stream.binance.com:9443/ws/!ticker@arr');
 	
 	tickerStream.on('message', data => {
-		console.log('receiving', 'wss://stream.binance.com:9443/ws/!ticker@arr', data);
+		// console.log('receiving', 'wss://stream.binance.com:9443/ws/!ticker@arr', data);
 		
 		try {
 			data = JSON.parse(data);
@@ -84,14 +84,14 @@ const apiRequest = (endpoint, {qs = {}, signed = false, method = 'GET', apiKey, 
 		qs = signRequest(qs, secretKey);
 	}
 	
-	console.log('request', uri, qs);
+	// console.log('request', uri, qs);
 	request({uri, qs, headers, method}, (error, response, body) => {
 		if (error) {
 			console.error(error);
 			return reject(error);
 		}
 		
-		console.log('response', uri, qs, body);
+		// console.log('response', uri, qs, body);
 		
 		body = JSON.parse(body);
 		
@@ -112,7 +112,7 @@ const connectUserDataStream = (apiKey) => {
 				userData[apiKey].stream = stream;
 				
 				stream.on('message', data => {
-					console.log('receiving', 'wss://stream.binance.com:9443/ws/' + listenKey, data);
+					// console.log('receiving', 'wss://stream.binance.com:9443/ws/' + listenKey, data);
 					
 					data = JSON.parse(data);
 					
