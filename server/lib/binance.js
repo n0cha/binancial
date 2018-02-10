@@ -84,7 +84,7 @@ const apiRequest = (endpoint, {qs = {}, signed = false, method = 'GET', apiKey, 
 		qs = signRequest(qs, secretKey);
 	}
 	
-	console.log('request', uri);
+	console.log('request', uri, qs);
 	request({uri, qs, headers, method}, (error, response, body) => {
 		if (error) {
 			console.error(error);
@@ -127,7 +127,11 @@ const connectUserDataStream = (apiKey) => {
 							break;
 						case 'executionReport':
 							const symbol = data.s;
-							userData[apiKey].trades[symbol].push({
+							const trades = userData[apiKey].trades[symbol];
+							if (!trades) {
+								return;
+							}
+							trades.push({
 								orderId: data.i,
 								price: data.L,
 								qty: data.l,
@@ -141,44 +145,60 @@ const connectUserDataStream = (apiKey) => {
 			});
 };
 
-const getUserData = ({apiKey, secretKey, symbols}) => {
-	if (userData[apiKey]) {
-		const ws = userData[apiKey].stream;
-		
-		if (!ws || ws.readyState === ws.CLOSED) {
-			connectUserDataStream(apiKey);
-		}
-		
-		return Promise.resolve(userData[apiKey]);
+const getBalances = ({apiKey, secretKey}) => {
+	let balances = _.get(userData[apiKey].balances);
+	
+	if (balances) {
+		return Promise.resolve(balances);
 	}
 	
-	userData[apiKey] = {
-		balances: {},
-		trades: {}
-	};
+	return apiRequest('api/v3/account', {apiKey, secretKey, signed: true})
+			.then(data => {
+				data.balances.forEach(balance => {
+					userData[apiKey].balances[balance.asset] = {
+						free: +balance.free,
+						locked: +balance.locked
+					};
+				});
+				return userData[apiKey].balances;
+			});
+};
+
+const getUserData = ({apiKey, secretKey, symbols}) => {
+	if (!userData[apiKey]) {
+		userData[apiKey] = {
+			balances: {},
+			trades: {}
+		};
+	}
 	
-	connectUserDataStream(apiKey);
-	
+	const ws = userData[apiKey].stream;
+	if (!ws || ws.readyState === ws.CLOSED) {
+		connectUserDataStream(apiKey);
+	}
+		
 	return Promise.all([
-		apiRequest('api/v3/account', {apiKey, secretKey, signed: true})
-				.then(data => {
-					data.balances.forEach(balance => {
-						userData[apiKey].balances[balance.asset] = {
-							free: +balance.free,
-							locked: +balance.locked
-						};
-					});
-				}),
-		Promise.all(symbols.map(symbol => apiRequest('api/v3/myTrades', {apiKey, secretKey, qs: {symbol}, signed: true})
-				.then(data => {
-					userData[apiKey].trades[symbol] = data;
-				})
-				.catch(() => {})
-		))
-	])
-			.then(() => {
-				return userData[apiKey];
+		getBalances({apiKey, secretKey}),
+		Promise.all(symbols.map(symbol => getTrades({apiKey, secretKey, symbol})))
+	]).then(() => userData[apiKey]);
+};
+
+const getTrades = ({apiKey, secretKey, symbol}) => {
+	let trades = userData[apiKey].trades[symbol];
+	if (trades) {
+		return Promise.resolve(trades);
+	}
+	
+	userData[apiKey].trades[symbol] = [];
+	
+	return apiRequest('api/v3/myTrades', {apiKey, secretKey, qs: {symbol}, signed: true})
+			.then(data => {
+				userData[apiKey].trades[symbol] = data;
+				return data;
 			})
+			.catch(() => {
+				delete userData[apiKey].trades[symbol];
+			});
 };
 
 module.exports = {
