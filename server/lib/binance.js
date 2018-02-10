@@ -3,13 +3,13 @@ const request = require('request');
 const CryptoJS = require('crypto-js');
 const WebSocket = require('ws');
 
+const baseUri = 'https://api.binance.com/';
 const recvWindow = 30000;
 
-const prices = {};
+const ticker = {};
 let tickerStream;
-const assets = {};
-const userDataStream = {};
 const tickerStreamSubscriptions = [];
+const userData = {};
 
 const connectWS = uri => {
 	console.log('connecting', uri);
@@ -37,12 +37,15 @@ const connectTickerStream = () => {
 			return;
 		}
 		
-		_.each(data, symbolData => {
-			prices[symbolData.s] = (+symbolData.c);
+		data.forEach(symbolData => {
+			ticker[symbolData.s] = {
+				price: (+symbolData.c),
+				change: (+symbolData.P)
+			}
 		});
 		
 		while (tickerStreamSubscriptions.length) {
-			tickerStreamSubscriptions.pop()(prices);
+			tickerStreamSubscriptions.pop()(ticker);
 		}
 	});
 };
@@ -51,7 +54,7 @@ const subscribeToTickerStream = callback => {
 	tickerStreamSubscriptions.push(callback);
 };
 
-const getPrices = () => new Promise((resolve, reject) => {
+const getTicker = () => new Promise((resolve, reject) => {
 	const ws = tickerStream;
 	
 	if (!ws || ws.readyState === ws.CLOSED) {
@@ -60,112 +63,125 @@ const getPrices = () => new Promise((resolve, reject) => {
 		return;
 	}
 	
-	resolve(prices);
+	resolve(ticker);
 });
 
-module.exports = ({apiKey, secretKey}) => {
-	const signRequest = qs => {
-		const timestamp = Date.now();
-		qs = _.assign(qs, {recvWindow, timestamp});
-		const queryString = _.map(qs, (value, key) => `${key}=${value}`).join('&');
-		qs.signature = CryptoJS.HmacSHA256(queryString, secretKey).toString(CryptoJS.enc.Hex);
-		return qs;
+const signRequest = (qs, secretKey) => {
+	const timestamp = Date.now();
+	qs = _.assign(qs, {recvWindow, timestamp});
+	const queryString = _.map(qs, (value, key) => `${key}=${value}`).join('&');
+	qs.signature = CryptoJS.HmacSHA256(queryString, secretKey).toString(CryptoJS.enc.Hex);
+	return qs;
+};
+
+const apiRequest = (endpoint, {qs = {}, signed = false, method = 'GET', apiKey, secretKey}) => new Promise((resolve, reject) => {
+	const uri = `${baseUri}${endpoint}`;
+	const headers = {
+		'X-MBX-APIKEY': apiKey
 	};
 	
-	const apiRequest = (endpoint, qs = {}, signed = false, method = 'GET') => new Promise((resolve, reject) => {
-		const baseUri = 'https://api.binance.com/';
-		const uri = `${baseUri}${endpoint}`;
-		const headers = {
-			'X-MBX-APIKEY': apiKey
-		};
-		
-		if (signed) {
-			qs = signRequest(qs);
+	if (signed) {
+		qs = signRequest(qs, secretKey);
+	}
+	
+	console.log('request', uri);
+	request({uri, qs, headers, method}, (error, response, body) => {
+		if (error) {
+			console.error(error);
+			return reject(error);
 		}
 		
-		console.log('request', uri);
-		request({uri, qs, headers, method}, (error, response, body) => {
-			if (error) {
-				console.error(error);
-				return reject(error);
-			}
-			
-			console.log('response', uri, body);
-			
-			body = JSON.parse(body);
-			
-			if (body.code && body.msg) {
-				console.error(apiKey, uri, body.code, body.msg);
-				return reject(body.msg);
-			}
-			
-			resolve(body);
-		});
+		console.log('response', uri, qs, body);
+		
+		body = JSON.parse(body);
+		
+		if (body.code && body.msg) {
+			console.error(apiKey, uri, body.code, body.msg);
+			return reject(body.msg);
+		}
+		
+		resolve(body);
 	});
-	
-	const connectUserDataStream = () => new Promise((resolve, reject) => {
-		//console.log('requesting user data listenkey');
-		apiRequest('/api/v1/userDataStream', {}, false, 'POST')
-				.then(({ listenKey }) => {
-					//console.log('opening user data stream');
-					userDataStream[apiKey] = connectWS('wss://stream.binance.com:9443/ws/' + listenKey);
+});
+
+const connectUserDataStream = (apiKey) => {
+	apiRequest('api/v1/userDataStream', {apiKey, method: 'POST'})
+			.then(({ listenKey }) => {
+				const stream = connectWS('wss://stream.binance.com:9443/ws/' + listenKey);
+				
+				userData[apiKey].stream = stream;
+				
+				stream.on('message', data => {
+					console.log('receiving', 'wss://stream.binance.com:9443/ws/' + listenKey, data);
 					
-					userDataStream[apiKey].on('message', data => {
-						//console.log('receiving user data');
-						console.log('receiving', 'wss://stream.binance.com:9443/ws/' + listenKey, data);
-						
-						data = JSON.parse(data);
-						
-						if (data.e !== 'outboundAccountInfo') {
-							return;
-						}
-						
-						assets[apiKey] = assets[apiKey] || {};
-						
-						_.each(data.B, balance => {
-							assets[apiKey][balance.a] = {
-								free: +balance.f,
-								locked: +balance.l
-							};
-						});
-						
-						resolve(assets[apiKey]);
-					});
+					data = JSON.parse(data);
+					
+					switch (data.e) {
+						case 'outboundAccountInfo':
+							_.each(data.B, balance => {
+								userData[apiKey].balances[balance.a] = {
+									free: +balance.f,
+									locked: +balance.l
+								};
+							});
+							break;
+						case 'executionReport':
+							const symbol = data.s;
+							userData[apiKey].trades[symbol].push({
+								orderId: data.i,
+								price: data.L,
+								qty: data.l,
+								time: data.T,
+								isBuyer: data.S === 'BUY'
+							});
+							break;
+					}
+					
 				});
-	});
-	
-	const getAccountData = () => {
-		const ws = userDataStream[apiKey];
+			});
+};
+
+const getUserData = ({apiKey, secretKey, symbols}) => {
+	if (userData[apiKey]) {
+		const ws = userData[apiKey].stream;
+		
 		if (!ws || ws.readyState === ws.CLOSED) {
-			connectUserDataStream();
+			connectUserDataStream(apiKey);
 		}
 		
-		if (assets[apiKey]) {
-			return Promise.resolve(assets[apiKey]);
-		}
-		
-		//console.log('requesting account data');
-		return apiRequest('api/v3/account', {}, true)
+		return Promise.resolve(userData[apiKey]);
+	}
+	
+	userData[apiKey] = {
+		balances: {},
+		trades: {}
+	};
+	
+	connectUserDataStream(apiKey);
+	
+	return Promise.all([
+		apiRequest('api/v3/account', {apiKey, secretKey, signed: true})
 				.then(data => {
-					//console.log('processing account data');
-					
-					assets[apiKey] = assets[apiKey] || {};
-					
-					_.each(data.balances, balance => {
-						assets[apiKey][balance.asset] = {
+					data.balances.forEach(balance => {
+						userData[apiKey].balances[balance.asset] = {
 							free: +balance.free,
 							locked: +balance.locked
 						};
 					});
-					
-					return assets[apiKey];
-				});
-	};
-	
-	return {
-		getPrices,
-		getAccountData,
-		getTrades: symbol => apiRequest('api/v3/myTrades', {symbol}, true),
-		getChange: symbol => apiRequest('api/v1/ticker/24hr', {symbol})
-	};
+				}),
+		Promise.all(symbols.map(symbol => apiRequest('api/v3/myTrades', {apiKey, secretKey, qs: {symbol}, signed: true})
+				.then(data => {
+					userData[apiKey].trades[symbol] = data;
+				})
+				.catch(() => {})
+		))
+	])
+			.then(() => {
+				return userData[apiKey];
+			})
+};
+
+module.exports = {
+	getTicker,
+	getUserData
 };

@@ -3,7 +3,7 @@ const binance = require('./binance.js');
 const coinMarketCap = require('./coinmarketcap');
 
 const getBalance = (data, symbol) => {
-	const balance = data.account[symbol];
+	const balance = data.balances[symbol];
 	return _.assign(balance, {
 		free: _.round(balance.free, 8),
 		locked: _.round(balance.locked, 8),
@@ -22,7 +22,7 @@ const getCoinChange = (data, symbol) => {
 };
 
 const getSymbolPrice = (data, symbol) => {
-	return data.prices[symbol];
+	return (data.ticker[symbol] || {}).price;
 };
 
 const getCoinData = (data, symbol, currency) => {
@@ -104,7 +104,7 @@ const getCoinRelevantTradeData = (data, coinSymbol, markets) => {
 };
 
 const getSymbolChange = (data, symbol) => {
-	return +(data.change[symbol] || {}).priceChangePercent;
+	return (data.ticker[symbol] || {}).change;
 };
 
 const getConversions = (coinData, conversions, coinSymbol, marketSymbol) => {
@@ -167,30 +167,23 @@ const setConversionRates = (conversions, data) => {
 
 module.exports = {
 	getData: ({apiKey, secretKey, markets, coins, conversions, currency}) => {
-		const bin = binance({apiKey, secretKey});
+		const symbols = _(coins)
+				.map(coin => _.map(markets, market => coin !== market && coin + market))
+				.flatten()
+				.compact()
+				.value();
 		
 		return Promise.all([
-				bin.getPrices(),
-				bin.getAccountData(),
+				binance.getTicker(),
+				binance.getUserData({apiKey, secretKey, symbols}),
 				coinMarketCap.getTicker({currency})
 		]).then(data => {
-			data = _.zipObject(['prices', 'account', 'values'], data);
-			
-			const symbols = _(coins)
-					.map(coin => _.map(markets, market => coin + market))
-					.flatten()
-					.filter(symbol => data.prices[symbol])
-					.value();
-			
-			return Promise.all([
-				Promise.all(_.map(symbols, bin.getTrades)),
-				Promise.all(_.map(symbols, bin.getChange))
-			])
-					.then(([tradesData, changeData]) => {
-						data.trades = _.zipObject(symbols, tradesData);
-						data.change = _.zipObject(symbols, changeData);
-						return data;
-					});
+			return {
+				ticker: data[0],
+				balances: data[1].balances,
+				trades: data[1].trades,
+				values: data[2]
+			};
 		}).then(data => {
 			// setConversionRates(conversions, data);
 			return {
