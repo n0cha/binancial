@@ -56,19 +56,23 @@
 						</el-row>
 						<div v-for="pair in coin.trades" :key="pair.tradeSymbol">
 							<el-row :gutter="2">
-								<el-col :span="5"><span class="-bin-cell"><label>{{pair.tradeSymbol}}</label></span></el-col>
-								<el-col :span="5"><span class="-bin-cell" data-number v-tooltip="'Quantity of your current assets in this coin bought through this market'">{{formatNumber(pair.boughtQty)}}</span></el-col>
-								<el-col :span="5"><span class="-bin-cell" data-number v-tooltip="'Average price paid for your current assets in this coin through this market'">{{pair.avgBuyPrice ? formatNumber(pair.avgBuyPrice) : 'N/A'}}</span>
-								</el-col>
-								<el-col :span="5">
+								<el-col :span="3"><span class="-bin-cell"><label>{{pair.tradeSymbol}}</label></span></el-col>
+								<el-col :span="4"><span class="-bin-cell" data-number v-tooltip="'Quantity of your current assets in this coin bought through this market'">{{formatNumber(pair.boughtQty)}}</span></el-col>
+								<el-col :span="4"><span class="-bin-cell" data-number v-tooltip="'Average price paid for your current assets in this coin through this market'">{{formatNumber(pair.avgBuyPrice)}}</span></el-col>
+								<el-col :span="4">
 									<span class="-bin-cell" data-number v-tooltip="'Current price of this coin in this market'">
 										<i class="md-icon -bin-change" :class="'-bin-change-' + trend(pair.change)">trending_{{trend(pair.change)}}</i>
 										{{formatNumber(pair.currentPrice)}}
 									</span>
 								</el-col>
-								<el-col :span="4"><span class="-bin-cell"
+								<el-col :span="3"><span class="-bin-cell" :class="highlightHigh(pair.ratio, true)"
 										:data-number="isFinite(pair.ratio) ? (pair.ratio > 1 ? 'positive' : 'negative') : ''"
-										v-tooltip="'Current profit margin'">{{pair.avgBuyPrice ? delta(pair.ratio) : 'N/A'}}</span>
+										v-tooltip="'Current profit margin'">{{delta(pair.ratio)}}</span>
+								</el-col>
+								<el-col :span="3"><span class="-bin-cell" data-number v-tooltip="'Last price you sold this coin for through this market'">{{formatNumber(pair.lastSellPrice)}}</span></el-col>
+								<el-col :span="3"><span class="-bin-cell" :class="highlightLow(pair.lastSellRatio)"
+                    :data-number="isFinite(pair.lastSellRatio) ? (pair.lastSellRatio > 1 ? 'positive' : 'negative') : ''"
+                    v-tooltip="'Current price compared to last sell price'">{{delta(pair.lastSellRatio)}}</span>
 								</el-col>
 							</el-row>
 <!--
@@ -111,14 +115,21 @@
 				this.$store.commit('setConnectionState', 200)
 				this.marketData = data
 			},
-			delta: value => (value < 1) ? `-${_.round((1 - value) * 100, 2)}%` : `+${_.round((value - 1) * 100, 2)}%`,
+			delta: value => isFinite(value) ? (value < 1) ? `-${_.round((1 - value) * 100, 2)}%` : `+${_.round((value - 1) * 100, 2)}%` : 'N/A',
 			formatNumber: value => _.isNumber(value) ? value.toFixed(8) : 'N/A',
 			formatCurrency: function (value) {
 				value = _.round(value, 2).toFixed(2)
 				return `${this.currencySymbol} ${value}`
+			},
+			highlightLow(value) {
+				return value <= 1 - this.highlightThreshold ? 'highlight' : '';
+			},
+			highlightHigh(value) {
+				return value >= 1 + this.highlightThreshold ? 'highlight' : '';
 			}
 		},
 		computed: {
+			highlightThreshold: () => 0.5,
 			marketAssets: function () {
 				return this.marketData.markets
 			},
@@ -127,7 +138,8 @@
 					return _.assign(coin, {
 						trades: _.map(coin.trades, trade => {
 							return _.assign(trade, {
-								ratio: trade.currentPrice / trade.avgBuyPrice/*,
+								ratio: trade.currentPrice / trade.avgBuyPrice,
+								lastSellRatio: trade.currentPrice / trade.lastSellPrice/*,
 								conversions: _.map(trade.conversions, conversion => {
 									return _.assign(conversion, {
 										ratio: trade.currentPrice / conversion.convertedAvgBuyPrice

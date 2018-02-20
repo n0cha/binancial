@@ -4,9 +4,19 @@
 	}
 	[data-number=positive] {
 		color: $positive;
+
+		&.highlight {
+			color: $white;
+			background: $positive;
+		}
 	}
 	[data-number=negative] {
 		color: $negative;
+
+		&.highlight {
+			color: $white;
+			background: $negative;
+		}
 	}
 	[data-number=dimmed] {
 		color: $light;

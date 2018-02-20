@@ -72,9 +72,11 @@ const getCoinRelevantTradeData = (data, coinSymbol, markets) => {
 	const result = {};
 	
 	_.each(markets, marketSymbol => {
-		result[coinSymbol + marketSymbol] = {
+		const symbol = coinSymbol + marketSymbol;
+		result[symbol] = {
 			sumPrice: 0,
-			sumQty: 0
+			sumQty: 0,
+			lastSellPrice: (+(_.find(trades, {symbol, isBuyer: false}) || {}).price)
 		}
 	});
 	
@@ -89,6 +91,7 @@ const getCoinRelevantTradeData = (data, coinSymbol, markets) => {
 			result[trade.symbol].sumPrice += totalPrice;
 			result[trade.symbol].sumQty += tradeQty;
 		} else {
+			result[trade.symbol].lastSellPrice = result[trade.symbol].lastSellPrice || (+trade.price);
 			result[trade.symbol].sumPrice -= totalPrice;
 			result[trade.symbol].sumQty -= tradeQty;
 		}
@@ -141,7 +144,8 @@ const getCoinsData = ({coins, markets, conversions, currency}, data) => {
 					currentPrice: getSymbolPrice(data, tradeSymbol),
 					avgBuyPrice: coinTradeData[tradeSymbol].averagePrice,
 					boughtQty: coinTradeData[tradeSymbol].sumQty,
-					change: getSymbolChange(data, tradeSymbol)
+					change: getSymbolChange(data, tradeSymbol),
+					lastSellPrice: coinTradeData[tradeSymbol].lastSellPrice
 				};
 			}))
 		});
