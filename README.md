@@ -1,5 +1,5 @@
 # binancial
-A tool for tracking your cryptocurrency assets on Binance.
+(2018) A tool for tracking your cryptocurrency assets on Binance.
 
 https://binancial.phondr.com
 
